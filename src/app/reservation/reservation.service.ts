@@ -6,6 +6,8 @@ import { Reservation } from '../models/reservation';
 })
 export class ReservationService {
 
+    private apiUrl = 'http://localhost:3000/reservations'
+
     private reservations: Reservation[] = [];
 
     addReservation(reservation: Reservation) {
