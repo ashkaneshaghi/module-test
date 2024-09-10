@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validator, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReservationService } from '../reservation/reservation.service';
 import { Reservation } from '../models/reservation';
+import { ActivatedRoute, Router } from '@angular/router';
 @Component({
     selector: 'app-reservation-form',
     templateUrl: './reservation-form.component.html',
@@ -13,7 +14,9 @@ export class ReservationFormComponent implements OnInit {
 
     constructor(
         private formBuilder: FormBuilder,
-        private reservationService: ReservationService
+        private reservationService: ReservationService,
+        private activatedRoute: ActivatedRoute,
+        private router: Router
     ) { }
 
     ngOnInit(): void {
@@ -24,11 +27,28 @@ export class ReservationFormComponent implements OnInit {
             guestEmail: ['', [Validators.required, Validators.email]],
             roomNumber: ['', Validators.required],
         });
+
+        let id = this.activatedRoute.snapshot.paramMap.get('id');
+        if (id) {
+            let reservation = this.reservationService.getReservationById(id);
+            if (reservation) {
+                this.reservationForm.patchValue(reservation);
+            }
+        }
     }
 
     onSubmit() {
-        let reservation: Reservation = this.reservationForm.value;
-        console.log(JSON.stringify(reservation));
-        this.reservationService.addReservation(reservation);
+        if (this.reservationForm.valid) {
+            let reservation: Reservation = this.reservationForm.value;
+
+            let id = this.activatedRoute.snapshot.paramMap.get('id');
+            if (id) {
+                this.reservationService.updateReservation(id, reservation);
+            } else {
+                this.reservationService.addReservation(reservation);
+            }
+
+            this.router.navigate(['/list']);
+        }
     }
 }
